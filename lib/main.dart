@@ -45,6 +45,14 @@ class FadingTextAnimation extends StatefulWidget {
 class _FadingTextAnimationState extends State<FadingTextAnimation> {
   bool _isVisible = true;
   Color selectedTextColor = Colors.blue;
+  bool isSwitched = false;
+  double _turns = 0.0;
+
+  void _rotateImage() {
+    setState(() {
+      _turns += 1.0; // Increment by 1.0 for a full 360-degree rotation
+    });
+  }
 
   void toggleVisibility() {
     setState(() {
@@ -56,7 +64,6 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
   Widget build(BuildContext context) {
     final isDark = widget.themeMode == ThemeMode.dark;
 
-    bool isSwitched = false;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -106,7 +113,10 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
         body: TabBarView(
           children: [
             Center(
-              child: AnimatedOpacity(
+              child:
+              GestureDetector(
+                onTap: toggleVisibility,
+                 child: AnimatedOpacity(
                 opacity: _isVisible ? 1.0 : 0.0,
                 duration: const Duration(seconds: 1),
                 curve: Curves.easeInOut,
@@ -115,8 +125,11 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
                   style: TextStyle(fontSize: 24, color: selectedTextColor),
                 ),
               ),
+              ),
             ),
             Center(
+              child: GestureDetector(
+                onTap: toggleVisibility,
               child: AnimatedOpacity(
                 opacity: _isVisible ? 1.0 : 0.0,
                 duration: const Duration(seconds: 5),
@@ -126,24 +139,41 @@ class _FadingTextAnimationState extends State<FadingTextAnimation> {
                   style: TextStyle(fontSize: 24, color: selectedTextColor),
                 ),
               ),
+              ),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.network(
-                  'https://images.steamusercontent.com/ugc/2056503000594664135/4A6CC88DE96CE4779E62810DCE348F5241999F59/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false',
+                Container(
                   width: 300,
                   height: 300,
-                  fit: BoxFit.cover,
+                  decoration: BoxDecoration(
+                    borderRadius: isSwitched ? BorderRadius.circular(50.0) : BorderRadius.zero,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: AnimatedRotation(
+                    turns: _turns,
+                    duration: const Duration(seconds: 1),
+                    child: Image.network(
+                    'https://images.steamusercontent.com/ugc/2056503000594664135/4A6CC88DE96CE4779E62810DCE348F5241999F59/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false',
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
+                  ),
                 ),
                 Switch(
                   value: isSwitched,
                   onChanged: (newValue) {
                   setState(() {
-                  isSwitched = newValue; // Update the state when the switch is toggled
+                  isSwitched = newValue;
                 });
               },
             ),
+            ElevatedButton(
+          onPressed: _rotateImage,
+          child: const Text('Rotate Image'),
+        ),
               ],
             ),
           ],
